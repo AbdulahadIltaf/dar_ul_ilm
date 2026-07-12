@@ -22,6 +22,11 @@ app.add_middleware(
 def read_root():
     return {"message": "Welcome to Madarsa Dar-Ul-Ilm Lilbanaat Student Portal API"}
 
+# Health check - useful for verifying the API is running on Vercel
+@app.get("/api/health")
+def health_check():
+    return {"status": "ok", "message": "API is running"}
+
 # --- AUTHENTICATION ---
 
 @app.post("/api/auth/register", response_model=schemas.UserResponse)
