@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import API_BASE_URL from '../config';
 
 export default function AuthPortal() {
   const [isLogin, setIsLogin] = useState(true);
@@ -30,8 +31,8 @@ export default function AuthPortal() {
     setLoading(true);
 
     const url = isLogin 
-      ? 'http://localhost:8000/api/auth/login' 
-      : 'http://localhost:8000/api/auth/register';
+      ? `${API_BASE_URL}/api/auth/login` 
+      : `${API_BASE_URL}/api/auth/register`;
       
     const payload = isLogin 
       ? { email, password } 

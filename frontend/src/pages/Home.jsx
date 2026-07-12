@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import API_BASE_URL from '../config';
 
 export default function Home() {
   const [courses, setCourses] = useState([]);
@@ -9,8 +10,8 @@ export default function Home() {
   useEffect(() => {
     // Fetch courses and announcements in parallel
     Promise.all([
-      fetch('http://localhost:8000/api/courses').then(res => res.json()),
-      fetch('http://localhost:8000/api/announcements').then(res => res.json())
+      fetch(`${API_BASE_URL}/api/courses`).then(res => res.json()),
+      fetch(`${API_BASE_URL}/api/announcements`).then(res => res.json())
     ])
       .then(([coursesData, announcementsData]) => {
         setCourses(coursesData.slice(0, 3)); // show first 3
@@ -117,6 +118,7 @@ export default function Home() {
               <p>Courses in Tafseer, Tajweed, and Sharai Masail verified and structured by qualified Alimahs.</p>
             </div>
             <div className="card value-card">
+              <div className="value-icon">🌿</div>
               <h3>Qualified Female Faculty</h3>
               <p>Classes led by experienced Ustadhas dedicated to personal mentoring and spiritual grooming (Tazkiyah).</p>
             </div>

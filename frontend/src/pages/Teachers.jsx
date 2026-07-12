@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import API_BASE_URL from '../config';
 
 export default function Teachers() {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/teachers')
+    fetch(`${API_BASE_URL}/api/teachers`)
       .then((res) => res.json())
       .then((data) => {
         setTeachers(data);

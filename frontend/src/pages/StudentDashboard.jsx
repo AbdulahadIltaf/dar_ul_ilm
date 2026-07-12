@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import API_BASE_URL from '../config';
 
 export default function StudentDashboard() {
   const [data, setData] = useState(null);
@@ -15,7 +16,7 @@ export default function StudentDashboard() {
       return;
     }
 
-    fetch('http://localhost:8000/api/student/dashboard', {
+    fetch(`${API_BASE_URL}/api/student/dashboard`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(async (res) => {

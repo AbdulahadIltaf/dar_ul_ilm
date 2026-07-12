@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CourseCard from '../components/CourseCard';
+import API_BASE_URL from '../config';
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -12,7 +13,7 @@ export default function Courses() {
 
   useEffect(() => {
     // 1. Fetch courses
-    fetch('http://localhost:8000/api/courses')
+    fetch(`${API_BASE_URL}/api/courses`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch courses");
         return res.json();
@@ -29,7 +30,7 @@ export default function Courses() {
 
     // 2. Fetch student enrollments if logged in
     if (token) {
-      fetch('http://localhost:8000/api/student/enrollments', {
+      fetch(`${API_BASE_URL}/api/student/enrollments`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => {
@@ -51,7 +52,7 @@ export default function Courses() {
     setSuccessMsg(null);
     setError(null);
 
-    fetch('http://localhost:8000/api/student/enroll', {
+    fetch(`${API_BASE_URL}/api/student/enroll`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../config';
 
 export default function AdminPanel() {
   const navigate = useNavigate();
@@ -54,11 +55,11 @@ export default function AdminPanel() {
     setLoading(true);
     // Fetch all required data in parallel
     Promise.all([
-      fetch('http://localhost:8000/api/admin/pending-students', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
-      fetch('http://localhost:8000/api/admin/pending-enrollments', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
-      fetch('http://localhost:8000/api/courses').then(res => res.json()),
-      fetch('http://localhost:8000/api/teachers').then(res => res.json()),
-      fetch('http://localhost:8000/api/announcements').then(res => res.json())
+      fetch(`${API_BASE_URL}/api/admin/pending-students`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
+      fetch(`${API_BASE_URL}/api/admin/pending-enrollments`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
+      fetch(`${API_BASE_URL}/api/courses`).then(res => res.json()),
+      fetch(`${API_BASE_URL}/api/teachers`).then(res => res.json()),
+      fetch(`${API_BASE_URL}/api/announcements`).then(res => res.json())
     ])
       .then(([usersData, enrollData, coursesData, teachersData, announcementsData]) => {
         setPendingUsers(usersData);
@@ -78,7 +79,7 @@ export default function AdminPanel() {
   // Handler: Approve Student Registration
   const handleApproveStudent = (userId) => {
     clearAlerts();
-    fetch(`http://localhost:8000/api/admin/approve-student/${userId}`, {
+    fetch(`${API_BASE_URL}/api/admin/approve-student/${userId}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -96,7 +97,7 @@ export default function AdminPanel() {
   // Handler: Approve Course Enrollment
   const handleApproveEnrollment = (enrollmentId) => {
     clearAlerts();
-    fetch(`http://localhost:8000/api/admin/approve-enrollment/${enrollmentId}`, {
+    fetch(`${API_BASE_URL}/api/admin/approve-enrollment/${enrollmentId}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -124,7 +125,7 @@ export default function AdminPanel() {
       message: annMessage
     };
 
-    fetch('http://localhost:8000/api/admin/announcements', {
+    fetch(`${API_BASE_URL}/api/admin/announcements`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -151,7 +152,7 @@ export default function AdminPanel() {
     if (!window.confirm(`Are you sure you want to delete announcement "${announcementTitle}"?`)) return;
     clearAlerts();
 
-    fetch(`http://localhost:8000/api/admin/announcements/${announcementId}`, {
+    fetch(`${API_BASE_URL}/api/admin/announcements/${announcementId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -176,7 +177,7 @@ export default function AdminPanel() {
       status: courseStatus
     };
 
-    fetch('http://localhost:8000/api/admin/courses', {
+    fetch(`${API_BASE_URL}/api/admin/courses`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -206,7 +207,7 @@ export default function AdminPanel() {
     if (!window.confirm(`Are you sure you want to delete course "${courseTitle}"? All associated materials, enrollments, and announcements will be deleted.`)) return;
     clearAlerts();
 
-    fetch(`http://localhost:8000/api/admin/courses/${courseId}`, {
+    fetch(`${API_BASE_URL}/api/admin/courses/${courseId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -230,7 +231,7 @@ export default function AdminPanel() {
       image_url: teacherImg || null
     };
 
-    fetch('http://localhost:8000/api/admin/teachers', {
+    fetch(`${API_BASE_URL}/api/admin/teachers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -259,7 +260,7 @@ export default function AdminPanel() {
     if (!window.confirm(`Are you sure you want to delete teacher "${teacherName}"?`)) return;
     clearAlerts();
 
-    fetch(`http://localhost:8000/api/admin/teachers/${teacherId}`, {
+    fetch(`${API_BASE_URL}/api/admin/teachers/${teacherId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` }
     })
