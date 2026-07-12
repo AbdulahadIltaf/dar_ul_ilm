@@ -1,3 +1,4 @@
+import os
 import bcrypt
 from datetime import datetime, timedelta
 from typing import Optional
@@ -8,7 +9,7 @@ from sqlalchemy.orm import Session
 import database, models
 
 # Security configuration
-SECRET_KEY = "darulilm_lilbanaat_secret_key_change_me_in_production"
+SECRET_KEY = os.getenv("SECRET_KEY", "darulilm_lilbanaat_secret_key_change_me_in_production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 1 day
 

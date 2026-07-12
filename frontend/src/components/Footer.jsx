@@ -24,10 +24,9 @@ export default function Footer() {
         </div>
         
         <div className="footer-contact">
-          <h4>Contact & Location</h4>
-          <p>📍 Near Masjid-e-Aqsa, Block C, Nazimabad, Karachi</p>
-          <p>📞 Phone: +92 300 1234567</p>
-          <p>✉️ Email: info@darulilmlilbanaat.edu.pk</p>
+          <h4>Contact Numbers</h4>
+          <p>📞 <a href="tel:03180031244" style={{ color: 'inherit', textDecoration: 'none' }}>0318 0031244</a></p>
+          <p>📞 <a href="tel:03112872640" style={{ color: 'inherit', textDecoration: 'none' }}>0311 2872640</a></p>
         </div>
       </div>
       

@@ -12,19 +12,29 @@ export default function AdminPanel() {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [pendingEnrollments, setPendingEnrollments] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Form State - Material Upload
-  const [matCourseId, setMatCourseId] = useState('');
-  const [matTitle, setMatTitle] = useState('');
-  const [matType, setMatType] = useState('pdf');
-  const [matUrl, setMatUrl] = useState('');
-  const [matDesc, setMatDesc] = useState('');
+
 
   // Form State - Announcement Creation
   const [annCourseId, setAnnCourseId] = useState(''); // Empty string is global
   const [annTitle, setAnnTitle] = useState('');
   const [annMessage, setAnnMessage] = useState('');
+
+  // Form State - Course Management
+  const [courseTitle, setCourseTitle] = useState('');
+  const [courseDesc, setCourseDesc] = useState('');
+  const [courseSchedule, setCourseSchedule] = useState('');
+  const [courseInstructor, setCourseInstructor] = useState('');
+  const [courseStatus, setCourseStatus] = useState('ongoing');
+
+  // Form State - Teacher Management
+  const [teacherName, setTeacherName] = useState('');
+  const [teacherQual, setTeacherQual] = useState('');
+  const [teacherBio, setTeacherBio] = useState('');
+  const [teacherImg, setTeacherImg] = useState('');
 
   // Alert State
   const [success, setSuccess] = useState(null);
@@ -46,15 +56,16 @@ export default function AdminPanel() {
     Promise.all([
       fetch('http://localhost:8000/api/admin/pending-students', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
       fetch('http://localhost:8000/api/admin/pending-enrollments', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
-      fetch('http://localhost:8000/api/courses').then(res => res.json())
+      fetch('http://localhost:8000/api/courses').then(res => res.json()),
+      fetch('http://localhost:8000/api/teachers').then(res => res.json()),
+      fetch('http://localhost:8000/api/announcements').then(res => res.json())
     ])
-      .then(([usersData, enrollData, coursesData]) => {
+      .then(([usersData, enrollData, coursesData, teachersData, announcementsData]) => {
         setPendingUsers(usersData);
         setPendingEnrollments(enrollData);
         setCourses(coursesData);
-        if (coursesData.length > 0) {
-          setMatCourseId(coursesData[0].id.toString());
-        }
+        setTeachers(teachersData);
+        setAnnouncements(announcementsData);
         setLoading(false);
       })
       .catch((err) => {
@@ -100,40 +111,7 @@ export default function AdminPanel() {
       .catch(err => setError(err.message));
   };
 
-  // Handler: Add Material Form Submission
-  const handleAddMaterial = (e) => {
-    e.preventDefault();
-    clearAlerts();
 
-    const payload = {
-      course_id: parseInt(matCourseId),
-      title: matTitle,
-      content_type: matType,
-      url: matUrl,
-      description: matDesc
-    };
-
-    fetch('http://localhost:8000/api/admin/content', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Upload failed");
-        return res.json();
-      })
-      .then(() => {
-        setSuccess(`Successfully uploaded study material '${matTitle}'!`);
-        // Reset form
-        setMatTitle('');
-        setMatUrl('');
-        setMatDesc('');
-      })
-      .catch(err => setError(err.message));
-  };
 
   // Handler: Add Announcement Form Submission
   const handleAddAnnouncement = (e) => {
@@ -158,14 +136,141 @@ export default function AdminPanel() {
         if (!res.ok) throw new Error("Announcement post failed");
         return res.json();
       })
-      .then(() => {
-        setSuccess(`Successfully posted announcement: '${annTitle}'`);
+      .then((newAnn) => {
+        setAnnouncements(prev => [newAnn, ...prev]);
+        setSuccess(`Successfully posted announcement: '${newAnn.title}'`);
         // Reset form
         setAnnTitle('');
         setAnnMessage('');
       })
       .catch(err => setError(err.message));
   };
+
+  // Handler: Delete Announcement
+  const handleDeleteAnnouncement = (announcementId, announcementTitle) => {
+    if (!window.confirm(`Are you sure you want to delete announcement "${announcementTitle}"?`)) return;
+    clearAlerts();
+
+    fetch(`http://localhost:8000/api/admin/announcements/${announcementId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to delete announcement");
+        setAnnouncements(prev => prev.filter(a => a.id !== announcementId));
+        setSuccess(`Successfully deleted announcement: ${announcementTitle}`);
+      })
+      .catch(err => setError(err.message));
+  };
+
+  // Handler: Add Course
+  const handleAddCourse = (e) => {
+    e.preventDefault();
+    clearAlerts();
+
+    const payload = {
+      title: courseTitle,
+      description: courseDesc || null,
+      schedule: courseSchedule || null,
+      instructor: courseInstructor || null,
+      status: courseStatus
+    };
+
+    fetch('http://localhost:8000/api/admin/courses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to add course");
+        return res.json();
+      })
+      .then((newCourse) => {
+        setCourses(prev => [...prev, newCourse]);
+        setSuccess(`Successfully added course: ${newCourse.title}`);
+        // Reset form
+        setCourseTitle('');
+        setCourseDesc('');
+        setCourseSchedule('');
+        setCourseInstructor('');
+        setCourseStatus('ongoing');
+      })
+      .catch(err => setError(err.message));
+  };
+
+  // Handler: Delete Course
+  const handleDeleteCourse = (courseId, courseTitle) => {
+    if (!window.confirm(`Are you sure you want to delete course "${courseTitle}"? All associated materials, enrollments, and announcements will be deleted.`)) return;
+    clearAlerts();
+
+    fetch(`http://localhost:8000/api/admin/courses/${courseId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to delete course");
+        setCourses(prev => prev.filter(c => c.id !== courseId));
+        setSuccess(`Successfully deleted course: ${courseTitle}`);
+      })
+      .catch(err => setError(err.message));
+  };
+
+  // Handler: Add Teacher
+  const handleAddTeacher = (e) => {
+    e.preventDefault();
+    clearAlerts();
+
+    const payload = {
+      name: teacherName,
+      qualification: teacherQual || null,
+      bio: teacherBio || null,
+      image_url: teacherImg || null
+    };
+
+    fetch('http://localhost:8000/api/admin/teachers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to add teacher");
+        return res.json();
+      })
+      .then((newTeacher) => {
+        setTeachers(prev => [...prev, newTeacher]);
+        setSuccess(`Successfully added teacher profile: ${newTeacher.name}`);
+        // Reset form
+        setTeacherName('');
+        setTeacherQual('');
+        setTeacherBio('');
+        setTeacherImg('');
+      })
+      .catch(err => setError(err.message));
+  };
+
+  // Handler: Delete Teacher
+  const handleDeleteTeacher = (teacherId, teacherName) => {
+    if (!window.confirm(`Are you sure you want to delete teacher "${teacherName}"?`)) return;
+    clearAlerts();
+
+    fetch(`http://localhost:8000/api/admin/teachers/${teacherId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to delete teacher");
+        setTeachers(prev => prev.filter(t => t.id !== teacherId));
+        setSuccess(`Successfully deleted teacher profile: ${teacherName}`);
+      })
+      .catch(err => setError(err.message));
+  };
+
 
   return (
     <div className="admin-page section">
@@ -189,17 +294,24 @@ export default function AdminPanel() {
           >
             Course Requests ({pendingEnrollments.length})
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'materials' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('materials'); clearAlerts(); }}
-          >
-            Add Study Materials
-          </button>
+
           <button 
             className={`tab-btn ${activeTab === 'announcements' ? 'active' : ''}`}
             onClick={() => { setActiveTab('announcements'); clearAlerts(); }}
           >
-            Post Announcements
+            Post Announcements ({announcements.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'manage-courses' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('manage-courses'); clearAlerts(); }}
+          >
+            Manage Courses ({courses.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'manage-teachers' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('manage-teachers'); clearAlerts(); }}
+          >
+            Manage Teachers ({teachers.length})
           </button>
         </div>
 
@@ -291,124 +403,322 @@ export default function AdminPanel() {
               </div>
             )}
 
-            {/* Tab: Upload Materials */}
-            {activeTab === 'materials' && (
-              <div className="tab-pane card form-card">
-                <h3>Post Course Resources</h3>
-                <form onSubmit={handleAddMaterial}>
-                  <div className="form-group">
-                    <label className="form-label">Select Course</label>
-                    <select 
-                      className="form-control"
-                      value={matCourseId}
-                      onChange={(e) => setMatCourseId(e.target.value)}
-                      required
-                    >
-                      {courses.map(c => (
-                        <option key={c.id} value={c.id}>{c.title}</option>
-                      ))}
-                    </select>
-                  </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Resource Title</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      value={matTitle}
-                      onChange={(e) => setMatTitle(e.target.value)}
-                      placeholder="e.g. Surah Al-Baqarah Verses 21-30 Tafseer Notes"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid-2">
-                    <div className="form-group">
-                      <label className="form-label">Resource Type</label>
-                      <select 
-                        className="form-control"
-                        value={matType}
-                        onChange={(e) => setMatType(e.target.value)}
-                      >
-                        <option value="pdf">📄 PDF Document</option>
-                        <option value="audio">🔊 Audio (MP3 Lecture)</option>
-                        <option value="link">🔗 Zoom/Meet Class Link</option>
-                        <option value="video">📹 Video Recording</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Resource URL / Link</label>
-                      <input 
-                        type="url" 
-                        className="form-control" 
-                        value={matUrl}
-                        onChange={(e) => setMatUrl(e.target.value)}
-                        placeholder="https://example.com/file.pdf"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Resource Description (Optional)</label>
-                    <textarea 
-                      className="form-control"
-                      value={matDesc}
-                      onChange={(e) => setMatDesc(e.target.value)}
-                      placeholder="Provide quick notes or joining instructions for the student portal..."
-                    />
-                  </div>
-
-                  <button type="submit" className="btn btn-primary">Add Resource to Portal</button>
-                </form>
-              </div>
-            )}
 
             {/* Tab: Post Announcements */}
             {activeTab === 'announcements' && (
-              <div className="tab-pane card form-card">
-                <h3>Post a Notification</h3>
-                <form onSubmit={handleAddAnnouncement}>
-                  <div className="form-group">
-                    <label className="form-label">Select Scope</label>
-                    <select 
-                      className="form-control"
-                      value={annCourseId}
-                      onChange={(e) => setAnnCourseId(e.target.value)}
-                    >
-                      <option value="">📢 Global (All Portal Users)</option>
-                      {courses.map(c => (
-                        <option key={c.id} value={c.id}>Course: {c.title}</option>
-                      ))}
-                    </select>
+              <div className="tab-pane">
+                <div className="admin-split-layout">
+                  {/* List Announcements */}
+                  <div className="admin-list-section card">
+                    <h3>Active Announcements</h3>
+                    {announcements.length === 0 ? (
+                      <p className="empty-message">No announcements posted yet.</p>
+                    ) : (
+                      <div className="table-wrapper">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Scope</th>
+                              <th>Title</th>
+                              <th>Message Summary</th>
+                              <th>Posted Date</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {announcements.map((ann) => (
+                              <tr key={ann.id}>
+                                <td>
+                                  <span className={`badge ${ann.course_id ? 'badge-info' : 'badge-primary'}`}>
+                                    {ann.course_id 
+                                      ? courses.find(c => c.id === ann.course_id)?.title || 'Course-specific'
+                                      : '📢 Global'}
+                                  </span>
+                                </td>
+                                <td><strong>{ann.title}</strong></td>
+                                <td>{ann.message.substring(0, 50)}{ann.message.length > 50 ? '...' : ''}</td>
+                                <td>{new Date(ann.created_at).toLocaleDateString()}</td>
+                                <td>
+                                  <button 
+                                    onClick={() => handleDeleteAnnouncement(ann.id, ann.title)} 
+                                    className="btn btn-danger btn-sm"
+                                  >
+                                    Delete
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Announcement Title</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      value={annTitle}
-                      onChange={(e) => setAnnTitle(e.target.value)}
-                      placeholder="e.g. Schedule Update / Upcoming Event"
-                      required
-                    />
+                  {/* Add Announcement Form */}
+                  <div className="admin-form-section card form-card">
+                    <h3>Post a Notification</h3>
+                    <form onSubmit={handleAddAnnouncement}>
+                      <div className="form-group">
+                        <label className="form-label">Select Scope</label>
+                        <select 
+                          className="form-control"
+                          value={annCourseId}
+                          onChange={(e) => setAnnCourseId(e.target.value)}
+                        >
+                          <option value="">📢 Global (All Portal Users)</option>
+                          {courses.map(c => (
+                            <option key={c.id} value={c.id}>Course: {c.title}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Announcement Title</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          value={annTitle}
+                          onChange={(e) => setAnnTitle(e.target.value)}
+                          placeholder="e.g. Schedule Update / Upcoming Event"
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Announcement Message</label>
+                        <textarea 
+                          className="form-control"
+                          value={annMessage}
+                          onChange={(e) => setAnnMessage(e.target.value)}
+                          placeholder="Write details for your students here..."
+                          required
+                        />
+                      </div>
+
+                      <button type="submit" className="btn btn-primary">Post Announcement</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tab: Manage Courses */}
+            {activeTab === 'manage-courses' && (
+              <div className="tab-pane">
+                <div className="admin-split-layout">
+                  {/* List Courses */}
+                  <div className="admin-list-section card">
+                    <h3>Existing Courses</h3>
+                    {courses.length === 0 ? (
+                      <p className="empty-message">No courses available.</p>
+                    ) : (
+                      <div className="table-wrapper">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Title</th>
+                              <th>Instructor</th>
+                              <th>Status</th>
+                              <th>Schedule</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {courses.map((c) => (
+                              <tr key={c.id}>
+                                <td><strong>{c.title}</strong></td>
+                                <td>{c.instructor || 'N/A'}</td>
+                                <td>
+                                  <span className={`badge ${c.status === 'ongoing' ? 'badge-success' : 'badge-warning'}`}>
+                                    {c.status === 'ongoing' ? 'Ongoing' : 'Upcoming'}
+                                  </span>
+                                </td>
+                                <td>{c.schedule || 'N/A'}</td>
+                                <td>
+                                  <button 
+                                    onClick={() => handleDeleteCourse(c.id, c.title)} 
+                                    className="btn btn-danger btn-sm"
+                                  >
+                                    Delete
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Announcement Message</label>
-                    <textarea 
-                      className="form-control"
-                      value={annMessage}
-                      onChange={(e) => setAnnMessage(e.target.value)}
-                      placeholder="Write details for your students here..."
-                      required
-                    />
+                  {/* Add Course Form */}
+                  <div className="admin-form-section card form-card">
+                    <h3>Add New Course</h3>
+                    <form onSubmit={handleAddCourse}>
+                      <div className="form-group">
+                        <label className="form-label">Course Title</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          value={courseTitle}
+                          onChange={(e) => setCourseTitle(e.target.value)}
+                          placeholder="e.g. Fiqh ul-Hadith"
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Course Description</label>
+                        <textarea 
+                          className="form-control"
+                          value={courseDesc}
+                          onChange={(e) => setCourseDesc(e.target.value)}
+                          placeholder="Course outline and goals..."
+                          rows="3"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Schedule</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          value={courseSchedule}
+                          onChange={(e) => setCourseSchedule(e.target.value)}
+                          placeholder="e.g. Every Monday & Tuesday - 4:00 PM"
+                        />
+                      </div>
+
+                      <div className="grid-2">
+                        <div className="form-group">
+                          <label className="form-label">Instructor</label>
+                          <select 
+                            className="form-control"
+                            value={courseInstructor}
+                            onChange={(e) => setCourseInstructor(e.target.value)}
+                          >
+                            <option value="">Select Instructor...</option>
+                            {teachers.map(t => (
+                              <option key={t.id} value={t.name}>{t.name}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Status</label>
+                          <select 
+                            className="form-control"
+                            value={courseStatus}
+                            onChange={(e) => setCourseStatus(e.target.value)}
+                          >
+                            <option value="ongoing">Ongoing</option>
+                            <option value="upcoming">Upcoming</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <button type="submit" className="btn btn-primary">Create Course</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tab: Manage Teachers */}
+            {activeTab === 'manage-teachers' && (
+              <div className="tab-pane">
+                <div className="admin-split-layout">
+                  {/* List Teachers */}
+                  <div className="admin-list-section card">
+                    <h3>Registered Teachers</h3>
+                    {teachers.length === 0 ? (
+                      <p className="empty-message">No teachers registered.</p>
+                    ) : (
+                      <div className="table-wrapper">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Name</th>
+                              <th>Qualification</th>
+                              <th>Bio Summary</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {teachers.map((t) => (
+                              <tr key={t.id}>
+                                <td><strong>{t.name}</strong></td>
+                                <td>{t.qualification || 'N/A'}</td>
+                                <td>{t.bio ? t.bio.substring(0, 80) + '...' : 'N/A'}</td>
+                                <td>
+                                  <button 
+                                    onClick={() => handleDeleteTeacher(t.id, t.name)} 
+                                    className="btn btn-danger btn-sm"
+                                  >
+                                    Delete
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
 
-                  <button type="submit" className="btn btn-primary">Post Announcement</button>
-                </form>
+                  {/* Add Teacher Form */}
+                  <div className="admin-form-section card form-card">
+                    <h3>Add New Teacher Profile</h3>
+                    <form onSubmit={handleAddTeacher}>
+                      <div className="form-group">
+                        <label className="form-label">Teacher Name</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          value={teacherName}
+                          onChange={(e) => setTeacherName(e.target.value)}
+                          placeholder="e.g. Ustadha Fatima"
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Qualification</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          value={teacherQual}
+                          onChange={(e) => setTeacherQual(e.target.value)}
+                          placeholder="e.g. Alimah (Shahadat-ul-Alimiyyah)"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Profile Image URL (Optional)</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          value={teacherImg}
+                          onChange={(e) => setTeacherImg(e.target.value)}
+                          placeholder="https://example.com/image.jpg"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Short Bio / Background</label>
+                        <textarea 
+                          className="form-control"
+                          value={teacherBio}
+                          onChange={(e) => setTeacherBio(e.target.value)}
+                          placeholder="Teaching experience, specialization, etc..."
+                          rows="4"
+                        />
+                      </div>
+
+                      <button type="submit" className="btn btn-primary">Create Teacher Profile</button>
+                    </form>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -473,6 +783,20 @@ export default function AdminPanel() {
           text-align: center;
           padding: 60px;
           color: var(--color-muted);
+        }
+        .admin-split-layout {
+          display: grid;
+          grid-template-columns: 1.2fr 0.8fr;
+          gap: 32px;
+          align-items: start;
+        }
+        .admin-list-section {
+          overflow-x: auto;
+        }
+        @media (max-width: 992px) {
+          .admin-split-layout {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </div>

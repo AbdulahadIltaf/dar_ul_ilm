@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import logoImg from '../assets/logo.jpeg';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function Navbar() {
     <header className="navbar-header">
       <div className="container navbar-container">
         <Link to="/" className="logo-section">
-          <div className="logo-icon">🕌</div>
+          <img src={logoImg} alt="Madarsa Dar-Ul-Ilm Lilbanaat Logo" className="logo-img" />
           <div className="logo-text-group">
             <span className="logo-title">DAR-UL-ILM</span>
             <span className="logo-subtitle">LILBANAAT • طلب العلم نور</span>
@@ -65,8 +66,11 @@ export default function Navbar() {
           gap: 12px;
           text-decoration: none;
         }
-        .logo-icon {
-          font-size: 2rem;
+        .logo-img {
+          height: 44px;
+          width: auto;
+          border-radius: var(--border-radius-sm);
+          object-fit: contain;
         }
         .logo-text-group {
           display: flex;

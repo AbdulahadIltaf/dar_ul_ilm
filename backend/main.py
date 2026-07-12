@@ -292,3 +292,52 @@ def create_teacher_profile(
     db.commit()
     db.refresh(new_teacher)
     return new_teacher
+
+@app.delete("/api/admin/courses/{course_id}")
+def delete_course(
+    course_id: int,
+    admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(database.get_db)
+):
+    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    # Also delete associated content, announcements, enrollments to prevent foreign key constraint issues
+    db.query(models.Enrollment).filter(models.Enrollment.course_id == course_id).delete()
+    db.query(models.PortalContent).filter(models.PortalContent.course_id == course_id).delete()
+    db.query(models.Announcement).filter(models.Announcement.course_id == course_id).delete()
+    
+    db.delete(course)
+    db.commit()
+    return {"message": "Course deleted successfully"}
+
+@app.delete("/api/admin/teachers/{teacher_id}")
+def delete_teacher(
+    teacher_id: int,
+    admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(database.get_db)
+):
+    teacher = db.query(models.TeacherProfile).filter(models.TeacherProfile.id == teacher_id).first()
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    
+    db.delete(teacher)
+    db.commit()
+    return {"message": "Teacher profile deleted successfully"}
+
+@app.delete("/api/admin/announcements/{announcement_id}")
+def delete_announcement(
+    announcement_id: int,
+    admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(database.get_db)
+):
+    announcement = db.query(models.Announcement).filter(models.Announcement.id == announcement_id).first()
+    if not announcement:
+        raise HTTPException(status_code=404, detail="Announcement not found")
+    
+    db.delete(announcement)
+    db.commit()
+    return {"message": "Announcement deleted successfully"}
+
+

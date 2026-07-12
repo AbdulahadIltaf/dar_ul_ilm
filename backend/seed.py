@@ -1,3 +1,4 @@
+import os
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base
 import models
@@ -9,35 +10,45 @@ def seed_database():
     db = SessionLocal()
 
     try:
+        # Clear existing data to ensure a clean re-seed
+        db.query(models.Enrollment).delete()
+        db.query(models.PortalContent).delete()
+        db.query(models.Announcement).delete()
+        db.query(models.Course).delete()
+        db.query(models.TeacherProfile).delete()
+        db.commit()
+        print("Existing database tables cleared for fresh seed.")
         # 1. Create Default Admin User
-        admin_email = "admin@darulilm.com"
+        admin_email = os.getenv("ADMIN_EMAIL", "admin@darulilm.com")
+        admin_password = os.getenv("ADMIN_PASSWORD", "adminpassword")
         admin_user = db.query(models.User).filter(models.User.email == admin_email).first()
         if not admin_user:
             admin_user = models.User(
                 name="Administration",
                 email=admin_email,
-                password_hash=auth.get_password_hash("adminpassword"),
+                password_hash=auth.get_password_hash(admin_password),
                 phone="0300-1234567",
                 role="admin",
                 is_approved=True
             )
             db.add(admin_user)
-            print("Admin account created (admin@darulilm.com / adminpassword)")
+            print(f"Admin account created ({admin_email} / {admin_password})")
 
         # 2. Create Default Student User (for demo)
-        student_email = "student@darulilm.com"
+        student_email = os.getenv("STUDENT_EMAIL", "student@darulilm.com")
+        student_password = os.getenv("STUDENT_PASSWORD", "studentpassword")
         student_user = db.query(models.User).filter(models.User.email == student_email).first()
         if not student_user:
             student_user = models.User(
                 name="Ayesha Ahmed",
                 email=student_email,
-                password_hash=auth.get_password_hash("studentpassword"),
+                password_hash=auth.get_password_hash(student_password),
                 phone="0312-7654321",
                 role="student",
                 is_approved=True
             )
             db.add(student_user)
-            print("Student account created (student@darulilm.com / studentpassword)")
+            print(f"Student account created ({student_email} / {student_password})")
 
         # 3. Create Default Courses if not existing
         courses_data = [
@@ -45,35 +56,35 @@ def seed_database():
                 "title": "Tafseer ul Quran (Batch 1)",
                 "description": "An in-depth study of the Quranic verses, word-to-word translation, grammatical analysis, and practical implementation in daily life.",
                 "schedule": "Every Saturday & Sunday - 10:00 AM to 11:30 AM",
-                "instructor": "Ustadha Zainab Khanani",
+                "instructor": "Ustadha Bint-e-Abdul Rehman",
                 "status": "ongoing"
             },
             {
                 "title": "Tafseer ul Quran (Batch 2)",
                 "description": "Weekly Tafseer class focused on Juz 30 and daily supplications, perfect for beginners and young learners.",
                 "schedule": "Every Tuesday & Thursday - 5:00 PM to 6:30 PM",
-                "instructor": "Ustadha Zainab Khanani",
+                "instructor": "Ustadha Bint-e-Abdul Rehman",
                 "status": "ongoing"
             },
             {
                 "title": "Tajweed ul Quran",
                 "description": "Mastering the rules of Tajweed, correct pronunciation of letters (Makharij), and beautification of Quran recitation.",
                 "schedule": "Every Monday & Wednesday - 3:00 PM to 4:30 PM",
-                "instructor": "Ustadha Zainab Khanani",
+                "instructor": "Ustadha Bint-e-Abdul Rehman",
                 "status": "ongoing"
             },
             {
                 "title": "Weekly Bayannat (Dua Series)",
                 "description": "A weekly spiritual gathering (Islahi talk) focusing on the power of Dua, purification of the heart, and gaining closeness to Allah.",
                 "schedule": "Every Friday - 9:00 PM PKT",
-                "instructor": "Ustadha Zainab Khanani",
+                "instructor": "Bint-e-Iftikhar",
                 "status": "ongoing"
             },
             {
                 "title": "Deeni o Sharai Masail",
                 "description": "Upcoming fiqh course addressing everyday Islamic jurisprudence queries, purification (Taharah), prayer rules, and contemporary issues.",
                 "schedule": "Starting 1st of July - Every Thursday - 4:00 PM",
-                "instructor": "Ustadha Zainab Khanani",
+                "instructor": "Umme Ibrahim",
                 "status": "upcoming"
             }
         ]
@@ -150,9 +161,21 @@ def seed_database():
         # 6. Seed Teacher Profiles
         teachers_data = [
             {
-                "name": "Ustadha Zainab Khanani",
-                "bio": "Ustadha Zainab Khanani is a highly respected Islamic scholar and educator. She has dedicated her life to teaching Quranic Tafseer, Tajweed, and Hadith sciences, particularly focusing on sisters' spiritual development (Tazkiyah) and jurisprudence questions (Masail).",
-                "qualification": "Alimah (Shahadat-ul-Alimiyyah) & Master's in Islamic Studies",
+                "name": "Bint-e-Iftikhar",
+                "bio": "🌿 Founder of Madarsa Dar-Ul-Ilm Lilbanaat\n\nThe visionary behind the establishment and educational journey of the institute.\n\n🎓 Alimah Graduate\nJamia Ayesha Siddiqua Lilbanaat\n\n📜 Khatam-e-Nabuwwat Course Qualified\n\n📚 Teaching Experience\n5 Years of Teaching Experience\n\n✨ Founder & Institute Leadership\nCommitted to nurturing a meaningful platform for Islamic learning and beneficial knowledge.",
+                "qualification": "Founder | Islamic Studies Educator",
+                "image_url": ""
+            },
+            {
+                "name": "Ustadha Bint-e-Abdul Rehman",
+                "bio": "🎓 Fazilah Graduate\nMadarsa Maryam Lilbanaat, Hyderabad\n\n🎓 Bachelor's Degree in Islamic Finance\nCurrently Pursuing\n\n📜 Khatam-e-Nabuwwat Course Qualified\n\n📖 Currently Teaching\nTafseer-ul-Qur'an & Tajweed Online\n\n💻 Teaching Experience\n3 Years of Online Teaching Experience\n\n🏛️ Management\nPart of the Management Team at Madarsa Dar-Ul-Ilm Lilbanaat",
+                "qualification": "Management Member & Islamic Studies Educator",
+                "image_url": ""
+            },
+            {
+                "name": "Umme Ibrahim",
+                "bio": "🎓 Bachelor's Degree in Psychology\n\n📖 Alimah Graduate\nJamia Ayesha Siddiqua Lilbanaat, Hyderabad\n\n📜 Khatam-e-Nabuwwat Course Qualified\n\n💻 Teaching Experience\n3 Years of Teaching Experience",
+                "qualification": "Islamic Studies Educator",
                 "image_url": ""
             }
         ]

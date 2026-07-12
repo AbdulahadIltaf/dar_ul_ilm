@@ -29,10 +29,10 @@ export default function Home() {
       <section className="hero-section">
         <div className="container hero-container">
           <div className="hero-content">
-            <span className="hero-tag">طلب العلم فريضة على كل مسلم</span>
+            <span className="hero-tag">Guiding Hearts Through the Light of the Qur'an</span>
             <h1 className="hero-title">Welcome to Madarsa Dar-Ul-Ilm Lilbanaat</h1>
             <p className="hero-subtitle">
-              Nurturing souls with the light of Quranic Tafseer, Tajweed, and sacred Islamic knowledge. Step into a serene learning sanctuary built with sincerity and excellence.
+              A sanctuary of learning, where hearts turn towards guidance, minds awaken through knowledge, and every step is taken with the hope of drawing closer to Allah ﷻ.
             </p>
             <div className="hero-actions">
               <Link to="/courses" className="btn btn-primary">Explore Courses</Link>
@@ -45,6 +45,38 @@ export default function Home() {
                 <span className="pattern-arabic">طلب العلم نور</span>
                 <span className="pattern-eng">Seeking Knowledge is Light</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Welcome Section */}
+      <section className="welcome-section">
+        <div className="container welcome-container">
+          <div className="welcome-card">
+            <h2 className="welcome-title">A Place Where Knowledge Finds a Home</h2>
+            <div className="floral-divider">❦ ════ • 💮 • ════ ❦</div>
+            <p className="welcome-greeting">Assalamu Alaikum Wa Rahmatullahi Wa Barakatuh</p>
+            <div className="welcome-text">
+              <p>
+                Welcome to <strong>Madarsa Dar-Ul-Ilm Lilbanaat</strong> — a sanctuary of learning, where hearts turn towards guidance, minds awaken through knowledge, and every step is taken with the hope of drawing closer to Allah ﷻ.
+              </p>
+              <p>
+                Here, we believe that sacred knowledge is more than words learned and lessons remembered. It is light that enters the heart, shapes the character, and transforms the journey of life.
+              </p>
+              
+              <div className="arabic-callout">
+                <span className="arabic-text">طلب العلم نور</span>
+                <span className="english-translation">Seeking knowledge is light.</span>
+              </div>
+              
+              <p>
+                May this be a place where questions find understanding, hearts find purpose, and knowledge becomes a lifelong companion.
+              </p>
+              <p className="welcome-conclusion">
+                Your journey towards light begins here. <br />
+                <strong>Welcome home. Welcome to Dar-Ul-Ilm.</strong> 🌿
+              </p>
             </div>
           </div>
         </div>
@@ -85,7 +117,6 @@ export default function Home() {
               <p>Courses in Tafseer, Tajweed, and Sharai Masail verified and structured by qualified Alimahs.</p>
             </div>
             <div className="card value-card">
-              <div className="value-icon">👩‍🏫</div>
               <h3>Qualified Female Faculty</h3>
               <p>Classes led by experienced Ustadhas dedicated to personal mentoring and spiritual grooming (Tazkiyah).</p>
             </div>
@@ -135,8 +166,8 @@ export default function Home() {
               Our vision is to empower sisters with traditional Islamic knowledge, enabling them to build a deep, meaningful connection with the Quran, develop fine moral character, and confidently navigate daily life in accordance with the Shariah.
             </p>
             <div className="quote-author">
-              <span className="author-name">Ustadha Zainab Khanani</span>
-              <span className="author-title">Principal, Madarsa Dar-Ul-Ilm Lilbanaat</span>
+              <span className="author-name">Bint-e-Iftikhar</span>
+              <span className="author-title">Founder, Madarsa Dar-Ul-Ilm Lilbanaat</span>
             </div>
           </div>
         </div>
@@ -399,6 +430,95 @@ export default function Home() {
           .hero-title {
             font-size: 2.2rem;
           }
+        }
+
+        /* Welcome Section Styling */
+        .welcome-section {
+          background-color: var(--color-bg);
+          padding: 80px 0;
+          border-bottom: 1.5px solid rgba(197, 160, 89, 0.1);
+        }
+        .welcome-container {
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        .welcome-card {
+          background-color: var(--color-bg-alt);
+          border: 2px solid var(--color-gold);
+          border-radius: var(--border-radius-lg);
+          padding: 48px;
+          box-shadow: var(--shadow-md);
+          text-align: center;
+          position: relative;
+        }
+        .welcome-card::after {
+          content: "";
+          position: absolute;
+          top: 8px;
+          left: 8px;
+          right: 8px;
+          bottom: 8px;
+          border: 1px dashed rgba(197, 160, 89, 0.4);
+          border-radius: calc(var(--border-radius-lg) - 6px);
+          pointer-events: none;
+        }
+        .welcome-title {
+          font-size: 2rem;
+          color: var(--color-forest);
+          margin-bottom: 16px;
+          font-family: var(--font-title);
+        }
+        .welcome-greeting {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: var(--color-gold);
+          margin: 20px 0;
+          font-family: var(--font-title);
+        }
+        .welcome-text {
+          font-size: 1.05rem;
+          line-height: 1.8;
+          color: var(--color-dark);
+          text-align: justify;
+          text-justify: inter-word;
+        }
+        .welcome-text p {
+          margin-bottom: 20px;
+        }
+        .arabic-callout {
+          background-color: rgba(30, 70, 32, 0.05);
+          border-left: 4px solid var(--color-forest);
+          padding: 16px 24px;
+          margin: 24px 0;
+          border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+        .arabic-text {
+          font-size: 2rem;
+          color: var(--color-forest);
+          font-family: 'Outfit', sans-serif;
+        }
+        .english-translation {
+          font-size: 0.95rem;
+          color: var(--color-muted);
+          font-style: italic;
+        }
+        .welcome-conclusion {
+          text-align: center;
+          font-size: 1.1rem;
+          color: var(--color-forest);
+          margin-top: 24px;
+          border-top: 1px solid rgba(197, 160, 89, 0.2);
+          padding-top: 20px;
+        }
+        .floral-divider {
+          color: var(--color-gold);
+          font-size: 1.1rem;
+          margin-bottom: 16px;
+          text-align: center;
         }
       `}</style>
     </div>
