@@ -2,6 +2,6 @@
   "name": "dar-ul-ilm-root",
   "version": "1.0.0",
   "scripts": {
-    "build": "npm install --prefix frontend && npm run build --prefix frontend && mv frontend/dist public"
+    "build": "npm install --prefix frontend && npm run build --prefix frontend && cp -r frontend/dist public"
   }
 }
