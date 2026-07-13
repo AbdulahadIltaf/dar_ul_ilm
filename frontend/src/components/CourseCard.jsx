@@ -56,18 +56,10 @@ export default function CourseCard({ course, enrollmentStatus, onEnroll }) {
     <div className="card course-card">
       <div className="course-card-header">
         {getStatusBadge(course.status)}
-        <span className="instructor-tag">👤 {course.instructor || 'Ustadha'}</span>
       </div>
       
       <h3 className="course-title">{course.title}</h3>
       <p className="course-desc">{course.description}</p>
-      
-      <div className="course-meta">
-        <div className="meta-item">
-          <span className="meta-icon">📅</span>
-          <span className="meta-text">{course.schedule}</span>
-        </div>
-      </div>
       
       <div className="course-actions">
         {getEnrollButton()}
@@ -82,14 +74,9 @@ export default function CourseCard({ course, enrollmentStatus, onEnroll }) {
         }
         .course-card-header {
           display: flex;
-          justify-content: space-between;
+          justify-content: flex-start;
           align-items: center;
           margin-bottom: 16px;
-        }
-        .instructor-tag {
-          font-size: 0.85rem;
-          color: var(--color-muted);
-          font-weight: 500;
         }
         .course-title {
           font-size: 1.35rem;
@@ -101,21 +88,6 @@ export default function CourseCard({ course, enrollmentStatus, onEnroll }) {
           color: var(--color-muted);
           margin-bottom: 20px;
           flex-grow: 1;
-        }
-        .course-meta {
-          border-top: 1px solid rgba(197, 160, 89, 0.15);
-          padding-top: 16px;
-          margin-bottom: 20px;
-        }
-        .meta-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.88rem;
-          color: var(--color-dark);
-        }
-        .meta-icon {
-          font-size: 1.1rem;
         }
         .btn-full {
           width: 100%;

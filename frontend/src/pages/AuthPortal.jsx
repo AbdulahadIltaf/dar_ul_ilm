@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import API_BASE_URL from '../config';
+import logoImg from '../assets/logo.jpeg';
 
 export default function AuthPortal() {
   const [isLogin, setIsLogin] = useState(true);
@@ -91,7 +92,8 @@ export default function AuthPortal() {
       <div className="container auth-container">
         <div className="auth-box card">
           <div className="auth-header">
-            <h3>🕌 Student Portal</h3>
+            <img src={logoImg} alt="Madarsa Dar-Ul-Ilm Lilbanaat" className="auth-logo" />
+            <h3>Student Portal</h3>
             <p>{isLogin ? 'Log in to access your classes and materials' : 'Register a simple account to enroll in courses'}</p>
           </div>
 
@@ -180,6 +182,15 @@ export default function AuthPortal() {
         .auth-header {
           text-align: center;
           margin-bottom: 28px;
+        }
+        .auth-logo {
+          width: 110px;
+          height: 110px;
+          object-fit: contain;
+          margin-bottom: 12px;
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
         }
         .auth-header h3 {
           font-size: 1.8rem;
