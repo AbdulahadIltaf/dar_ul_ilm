@@ -383,9 +383,9 @@ export default function AdminPanel() {
                       <tbody>
                         {pendingEnrollments.map((e) => (
                           <tr key={e.id}>
-                            <td><strong>{e.user.name}</strong></td>
-                            <td>{e.user.email}</td>
-                            <td><span className="badge badge-info">{e.course.title}</span></td>
+                            <td><strong>{e.users?.name || 'N/A'}</strong></td>
+                            <td>{e.users?.email || 'N/A'}</td>
+                            <td><span className="badge badge-info">{e.courses?.title || 'N/A'}</span></td>
                             <td>{new Date(e.created_at).toLocaleDateString()}</td>
                             <td>
                               <button 
