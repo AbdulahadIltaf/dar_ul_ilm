@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logoImg from '../assets/logo.jpeg';
 import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../config';
 
@@ -276,8 +277,13 @@ export default function AdminPanel() {
   return (
     <div className="admin-page section">
       <div className="container">
-        <h2 className="admin-title">🕌 Administration Panel</h2>
-        <p className="admin-subtitle">Welcome to the teacher/admin dashboard. Review registrations, enrollments, and post materials.</p>
+        <div className="admin-header">
+          <img src={logoImg} alt="Madarsa Dar-Ul-Ilm Lilbanaat" className="admin-logo" />
+          <div>
+            <h2 className="admin-title">Administration Panel</h2>
+            <p className="admin-subtitle">Welcome to the teacher/admin dashboard. Review registrations, enrollments, and post materials.</p>
+          </div>
+        </div>
 
         {success && <div className="alert alert-success">{success}</div>}
         {error && <div className="alert alert-error">{error}</div>}
@@ -727,14 +733,26 @@ export default function AdminPanel() {
       </div>
 
       <style>{`
+        .admin-header {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          margin-bottom: 40px;
+        }
+        .admin-logo {
+          width: 90px;
+          height: 90px;
+          object-fit: contain;
+          flex-shrink: 0;
+        }
         .admin-title {
           font-size: 2.2rem;
           color: var(--color-forest);
-          margin-bottom: 8px;
+          margin-bottom: 6px;
         }
         .admin-subtitle {
           color: var(--color-muted);
-          margin-bottom: 40px;
+          margin-bottom: 0;
         }
         .admin-tabs {
           display: flex;
