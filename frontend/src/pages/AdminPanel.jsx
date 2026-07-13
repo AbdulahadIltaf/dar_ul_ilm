@@ -28,8 +28,6 @@ export default function AdminPanel() {
   // Form State - Course Management
   const [courseTitle, setCourseTitle] = useState('');
   const [courseDesc, setCourseDesc] = useState('');
-  const [courseSchedule, setCourseSchedule] = useState('');
-  const [courseInstructor, setCourseInstructor] = useState('');
   const [courseStatus, setCourseStatus] = useState('ongoing');
 
   // Form State - Teacher Management
@@ -173,8 +171,6 @@ export default function AdminPanel() {
     const payload = {
       title: courseTitle,
       description: courseDesc || null,
-      schedule: courseSchedule || null,
-      instructor: courseInstructor || null,
       status: courseStatus
     };
 
@@ -196,8 +192,6 @@ export default function AdminPanel() {
         // Reset form
         setCourseTitle('');
         setCourseDesc('');
-        setCourseSchedule('');
-        setCourseInstructor('');
         setCourseStatus('ongoing');
       })
       .catch(err => setError(err.message));
@@ -525,9 +519,7 @@ export default function AdminPanel() {
                           <thead>
                             <tr>
                               <th>Title</th>
-                              <th>Instructor</th>
                               <th>Status</th>
-                              <th>Schedule</th>
                               <th>Action</th>
                             </tr>
                           </thead>
@@ -535,13 +527,11 @@ export default function AdminPanel() {
                             {courses.map((c) => (
                               <tr key={c.id}>
                                 <td><strong>{c.title}</strong></td>
-                                <td>{c.instructor || 'N/A'}</td>
                                 <td>
                                   <span className={`badge ${c.status === 'ongoing' ? 'badge-success' : 'badge-warning'}`}>
                                     {c.status === 'ongoing' ? 'Ongoing' : 'Upcoming'}
                                   </span>
                                 </td>
-                                <td>{c.schedule || 'N/A'}</td>
                                 <td>
                                   <button 
                                     onClick={() => handleDeleteCourse(c.id, c.title)} 
@@ -586,42 +576,15 @@ export default function AdminPanel() {
                       </div>
 
                       <div className="form-group">
-                        <label className="form-label">Schedule</label>
-                        <input 
-                          type="text" 
-                          className="form-control" 
-                          value={courseSchedule}
-                          onChange={(e) => setCourseSchedule(e.target.value)}
-                          placeholder="e.g. Every Monday & Tuesday - 4:00 PM"
-                        />
-                      </div>
-
-                      <div className="grid-2">
-                        <div className="form-group">
-                          <label className="form-label">Instructor</label>
-                          <select 
-                            className="form-control"
-                            value={courseInstructor}
-                            onChange={(e) => setCourseInstructor(e.target.value)}
-                          >
-                            <option value="">Select Instructor...</option>
-                            {teachers.map(t => (
-                              <option key={t.id} value={t.name}>{t.name}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="form-group">
-                          <label className="form-label">Status</label>
-                          <select 
-                            className="form-control"
-                            value={courseStatus}
-                            onChange={(e) => setCourseStatus(e.target.value)}
-                          >
-                            <option value="ongoing">Ongoing</option>
-                            <option value="upcoming">Upcoming</option>
-                          </select>
-                        </div>
+                        <label className="form-label">Status</label>
+                        <select 
+                          className="form-control"
+                          value={courseStatus}
+                          onChange={(e) => setCourseStatus(e.target.value)}
+                        >
+                          <option value="ongoing">Ongoing</option>
+                          <option value="upcoming">Upcoming</option>
+                        </select>
                       </div>
 
                       <button type="submit" className="btn btn-primary">Create Course</button>
