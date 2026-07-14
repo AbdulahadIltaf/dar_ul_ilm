@@ -16,6 +16,8 @@ export default function AdminPanel() {
   const [courses, setCourses] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
+  const [allStudents, setAllStudents] = useState([]);
+  const [studentSearch, setStudentSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
 
@@ -58,14 +60,16 @@ export default function AdminPanel() {
       fetch(`${API_BASE_URL}/api/admin/pending-enrollments`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
       fetch(`${API_BASE_URL}/api/courses`).then(res => res.json()),
       fetch(`${API_BASE_URL}/api/teachers`).then(res => res.json()),
-      fetch(`${API_BASE_URL}/api/announcements`).then(res => res.json())
+      fetch(`${API_BASE_URL}/api/announcements`).then(res => res.json()),
+      fetch(`${API_BASE_URL}/api/admin/students`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
     ])
-      .then(([usersData, enrollData, coursesData, teachersData, announcementsData]) => {
+      .then(([usersData, enrollData, coursesData, teachersData, announcementsData, studentsData]) => {
         setPendingUsers(usersData);
         setPendingEnrollments(enrollData);
         setCourses(coursesData);
         setTeachers(teachersData);
         setAnnouncements(announcementsData);
+        setAllStudents(Array.isArray(studentsData) ? studentsData : []);
         setLoading(false);
       })
       .catch((err) => {
@@ -267,6 +271,23 @@ export default function AdminPanel() {
       .catch(err => setError(err.message));
   };
 
+  // Handler: Delete Student
+  const handleDeleteStudent = (studentId, studentName) => {
+    if (!window.confirm(`Are you sure you want to permanently delete student "${studentName}"? This will also remove all their course enrollments.`)) return;
+    clearAlerts();
+
+    fetch(`${API_BASE_URL}/api/admin/students/${studentId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to delete student");
+        setAllStudents(prev => prev.filter(s => s.id !== studentId));
+        setSuccess(`Successfully deleted student: ${studentName}`);
+      })
+      .catch(err => setError(err.message));
+  };
+
 
   return (
     <div className="admin-page section">
@@ -313,6 +334,12 @@ export default function AdminPanel() {
             onClick={() => { setActiveTab('manage-teachers'); clearAlerts(); }}
           >
             Manage Teachers ({teachers.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'all-students' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('all-students'); clearAlerts(); }}
+          >
+            All Students ({allStudents.length})
           </button>
         </div>
 
@@ -693,6 +720,78 @@ export default function AdminPanel() {
             )}
           </div>
         )}
+
+            {/* Tab: All Students */}
+            {activeTab === 'all-students' && (
+              <div className="tab-pane">
+                <div className="students-header-row">
+                  <h3>All Registered Students</h3>
+                  <div className="student-search-wrap">
+                    <span className="search-icon">🔍</span>
+                    <input
+                      type="text"
+                      className="form-control student-search-input"
+                      placeholder="Search by name or phone..."
+                      value={studentSearch}
+                      onChange={(e) => setStudentSearch(e.target.value)}
+                    />
+                  </div>
+                </div>
+                {allStudents.length === 0 ? (
+                  <p className="empty-message">No approved students found.</p>
+                ) : (() => {
+                  const filtered = allStudents.filter(s =>
+                    s.name?.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                    s.phone?.toLowerCase().includes(studentSearch.toLowerCase())
+                  );
+                  return filtered.length === 0 ? (
+                    <p className="empty-message">No students match your search.</p>
+                  ) : (
+                    <div className="table-wrapper">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Phone Number</th>
+                            <th>Email</th>
+                            <th>Joined Date</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filtered.map((s, idx) => (
+                            <tr key={s.id}>
+                              <td className="student-index">{idx + 1}</td>
+                              <td><strong>{s.name}</strong></td>
+                              <td>
+                                <span className="phone-badge">
+                                  📞 {s.phone || <em style={{color:'var(--color-muted)'}}>N/A</em>}
+                                </span>
+                              </td>
+                              <td>{s.email}</td>
+                              <td>{new Date(s.created_at).toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                              <td>
+                                <button
+                                  onClick={() => handleDeleteStudent(s.id, s.name)}
+                                  className="btn btn-danger btn-sm"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
+                <p className="students-count-note">Showing {allStudents.filter(s =>
+                  s.name?.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                  s.phone?.toLowerCase().includes(studentSearch.toLowerCase())
+                ).length} of {allStudents.length} approved students</p>
+              </div>
+            )}
       </div>
 
       <style>{`
@@ -779,6 +878,57 @@ export default function AdminPanel() {
           .admin-split-layout {
             grid-template-columns: 1fr;
           }
+        }
+        .students-header-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+        .students-header-row h3 {
+          margin-bottom: 0;
+        }
+        .student-search-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+        .search-icon {
+          position: absolute;
+          left: 12px;
+          font-size: 1rem;
+          pointer-events: none;
+        }
+        .student-search-input {
+          padding-left: 36px !important;
+          min-width: 260px;
+          border-radius: 50px !important;
+        }
+        .student-index {
+          color: var(--color-muted);
+          font-size: 0.85rem;
+          width: 36px;
+        }
+        .phone-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(197, 160, 89, 0.12);
+          color: var(--color-forest);
+          font-weight: 600;
+          padding: 4px 12px;
+          border-radius: 50px;
+          font-size: 0.9rem;
+          letter-spacing: 0.3px;
+        }
+        .students-count-note {
+          margin-top: 16px;
+          color: var(--color-muted);
+          font-size: 0.85rem;
+          font-style: italic;
+          text-align: right;
         }
       `}</style>
     </div>

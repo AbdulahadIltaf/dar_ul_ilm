@@ -196,6 +196,26 @@ def get_student_dashboard(current_user: dict = Depends(auth.get_current_active_u
 
 # ── ADMIN APIs ───────────────────────────────────────────────────────────────
 
+@app.get("/api/admin/students")
+def get_all_students(admin: dict = Depends(auth.get_current_admin)):
+    return database.supabase.table("users") \
+        .select("id, name, phone, email, created_at") \
+        .eq("role", "student") \
+        .eq("is_approved", True) \
+        .order("name") \
+        .execute().data
+
+
+@app.delete("/api/admin/students/{user_id}")
+def delete_student(user_id: int, admin: dict = Depends(auth.get_current_admin)):
+    # Cascade delete enrollments first
+    database.supabase.table("enrollments").delete().eq("user_id", user_id).execute()
+    result = database.supabase.table("users").delete().eq("id", user_id).eq("role", "student").execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return {"message": "Student deleted successfully"}
+
+
 @app.get("/api/admin/pending-students")
 def get_pending_students(admin: dict = Depends(auth.get_current_admin)):
     return database.supabase.table("users") \
