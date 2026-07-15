@@ -67,7 +67,7 @@ export default function Navbar() {
           text-decoration: none;
         }
         .logo-img {
-          height: 44px;
+          height: 64px;
           width: auto;
           border-radius: var(--border-radius-sm);
           object-fit: contain;
