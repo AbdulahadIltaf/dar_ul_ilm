@@ -45,9 +45,16 @@ export default function AuthPortal() {
       body: JSON.stringify(payload)
     })
       .then(async (res) => {
-        const data = await res.json();
+        let data = null;
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          throw new Error(`Server returned status ${res.status}: ${text || 'Internal Server Error. Please verify database connection and environment variables.'}`);
+        }
         if (!res.ok) {
-          throw new Error(data.detail || "Authentication request failed");
+          throw new Error(data?.detail || "Authentication request failed");
         }
         return data;
       })
